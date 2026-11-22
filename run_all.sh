@@ -6,6 +6,7 @@
 #   bash run_all.sh --max-samples 70  # tiny real run to check the setup before the full run
 set -euo pipefail
 cd "$(dirname "$0")"
+export HF_HUB_DISABLE_XET=1
 ARGS=("$@")
 PY=${PYTHON:-python}
 stage() { echo; echo "=== $1 ==="; shift; "$PY" "$@" "${ARGS[@]}"; }

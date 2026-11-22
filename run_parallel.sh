@@ -5,6 +5,7 @@
 #   bash run_parallel.sh --fake         # CPU smoke test (pretends 2 GPUs)
 set -euo pipefail
 cd "$(dirname "$0")"
+export HF_HUB_DISABLE_XET=1
 ARGS=("$@")
 PY=${PYTHON:-python}
 FAKE=0; for a in "${ARGS[@]}"; do [[ "$a" == "--fake" ]] && FAKE=1; done

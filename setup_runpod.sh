@@ -11,10 +11,11 @@ mkdir -p ext checkpoints datasets
 
 # 2) Python deps. Keep the pod's preinstalled CUDA torch; install the rest.
 export PIP_BREAK_SYSTEM_PACKAGES=1
+export HF_HUB_DISABLE_XET=1   # plain HTTP downloads; the xet path was ~20x slower unauthenticated
 python -m pip install --upgrade pip
-grep -v -E '^(torch|torchaudio|torchvision)' ext/ChordEdit-Reproduction/requirement.txt > /tmp/lab_requirements.txt
-python -m pip install -r /tmp/lab_requirements.txt
-python -m pip install -r requirements.txt
+grep -v -E '^(torch|torchaudio|torchvision)([=<>~ ]|$)' ext/ChordEdit-Reproduction/requirement.txt > /tmp/lab_requirements.txt
+# One resolver pass so the kit's pins (diffusers / transformers versions the lab's tools work with) win.
+python -m pip install -r /tmp/lab_requirements.txt -r requirements.txt
 
 # 3) SD-Turbo weights (accept the license on Hugging Face first if prompted; then `huggingface-cli login`)
 if [ ! -d checkpoints/sd-turbo/unet ]; then

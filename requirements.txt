@@ -5,6 +5,11 @@ scipy
 matplotlib
 pyyaml
 huggingface_hub[cli]
+# Pins verified on RTX 4090 / torch 2.8 (Nov 2026): torchmetrics 1.8.2 CLIPScore breaks with transformers 5.x,
+# and transformers 4.x needs huggingface_hub<1.0, which needs diffusers<=0.35.
+transformers>=4.50,<5
+diffusers==0.35.2
+torchmetrics==1.8.2
 accelerate
 lpips
 pytest

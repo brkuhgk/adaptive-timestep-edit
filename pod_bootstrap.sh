@@ -4,6 +4,7 @@
 # The PIE-Bench link is passed at run time on purpose: the dataset authors ask that it not be shared.
 set -euo pipefail
 cd "$(dirname "$0")"
+export HF_HUB_DISABLE_XET=1
 PIE_URL=${1:-}
 export PIP_BREAK_SYSTEM_PACKAGES=1
 bash setup_runpod.sh
@@ -22,9 +23,9 @@ ls datasets/PIE-Bench_v1 | head
 python -c "import json; m=json.load(open('datasets/PIE-Bench_v1/mapping_file.json')); print('PIE-Bench samples:', len(m))"
 
 echo "=== 70-image check ==="
-WORKERS_PER_GPU=${WORKERS_PER_GPU:-3} bash run_parallel.sh --quick --max-samples 70
+WORKERS_PER_GPU=${WORKERS_PER_GPU:-2} bash run_parallel.sh --quick --max-samples 70
 cp work/results/main_table.md check_main_table_70.md 2>/dev/null || true
 echo "=== Full 1-seed study (resumes: the 70 checked images are not redone) ==="
-WORKERS_PER_GPU=${WORKERS_PER_GPU:-3} bash run_parallel.sh --quick
+WORKERS_PER_GPU=${WORKERS_PER_GPU:-2} bash run_parallel.sh --quick
 tar czf results_$(date +%Y%m%d_%H%M).tgz work/results && ls -la results_*.tgz
 echo "ALL DONE"
