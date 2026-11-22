@@ -26,5 +26,5 @@ WORKERS_PER_GPU=${WORKERS_PER_GPU:-3} bash run_parallel.sh --quick --max-samples
 cp work/results/main_table.md check_main_table_70.md 2>/dev/null || true
 echo "=== Full 1-seed study (resumes: the 70 checked images are not redone) ==="
 WORKERS_PER_GPU=${WORKERS_PER_GPU:-3} bash run_parallel.sh --quick
-tar czf results_$(date +%Y%m%d_%H%M).tgz work/results report/*_filled.* && ls -la results_*.tgz
+tar czf results_$(date +%Y%m%d_%H%M).tgz work/results && ls -la results_*.tgz
 echo "ALL DONE"

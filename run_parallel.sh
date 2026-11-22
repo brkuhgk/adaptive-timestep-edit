@@ -45,5 +45,5 @@ run_sharded grid_eval "$N" scripts/02_grid.py scripts/03_evaluate.py
 run_sharded probe "$NGPU" scripts/04_probe.py      # one per GPU: the probe batch is memory-heavy
 "$PY" scripts/05_classify.py "${ARGS[@]}"
 "$PY" scripts/06_analyze.py "${ARGS[@]}"
-"$PY" scripts/07_fill_report.py "${ARGS[@]}"
+[ -f scripts/07_fill_report.py ] && "$PY" scripts/07_fill_report.py "${ARGS[@]}" || true
 echo "Done. Results in $WORK/results/ (main_table.md, summary.json, fig_*.png); drafts in report/*_filled.*"
