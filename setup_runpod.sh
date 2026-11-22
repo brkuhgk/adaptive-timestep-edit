@@ -13,8 +13,9 @@ mkdir -p ext checkpoints datasets
 export PIP_BREAK_SYSTEM_PACKAGES=1
 export HF_HUB_DISABLE_XET=1   # plain HTTP downloads; the xet path was ~20x slower unauthenticated
 python -m pip install --upgrade pip
-grep -v -E '^(torch|torchaudio|torchvision)([=<>~ ]|$)' ext/ChordEdit-Reproduction/requirement.txt > /tmp/lab_requirements.txt
-# One resolver pass so the kit's pins (diffusers / transformers versions the lab's tools work with) win.
+grep -v -E '^((torch|torchaudio|torchvision)([=<>~ ]|$)|gradio|datasets)' ext/ChordEdit-Reproduction/requirement.txt > /tmp/lab_requirements.txt
+# gradio (the lab's demo app) and datasets are not needed here; they force huggingface_hub>=1 and, through it,
+# transformers 5.x, which breaks the lab's torchmetrics 1.8.2 CLIPScore. One resolver pass so the kit's pins (diffusers / transformers versions the lab's tools work with) win.
 python -m pip install -r /tmp/lab_requirements.txt -r requirements.txt
 
 # 3) SD-Turbo weights (accept the license on Hugging Face first if prompted; then `huggingface-cli login`)
