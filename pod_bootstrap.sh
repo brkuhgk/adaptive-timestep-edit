@@ -12,7 +12,7 @@ if [ ! -f datasets/PIE-Bench_v1/mapping_file.json ]; then
   [ -n "$PIE_URL" ] || { echo "Pass the PIE-Bench Drive folder link as the first argument"; exit 1; }
   python -m pip install -q gdown
   mkdir -p datasets/pie_download datasets/pie_unpacked
-  gdown --folder "$PIE_URL" -O datasets/pie_download --remaining-ok
+  gdown --folder "$PIE_URL" -O datasets/pie_download
   find datasets/pie_download -name "*.zip" -print0 | while IFS= read -r -d '' z; do unzip -q -o "$z" -d datasets/pie_unpacked; done
   MAP=$(find datasets/pie_download datasets/pie_unpacked -name mapping_file.json | head -1)
   [ -n "$MAP" ] || { echo "mapping_file.json not found in the download"; find datasets -maxdepth 4 | head -50; exit 1; }
