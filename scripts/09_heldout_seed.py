@@ -58,6 +58,11 @@ def oracle_choices(results: Path, ref: str) -> dict:
 
 
 def load_calc(settings, device):
+    # The editor repo and the evaluator repo both ship a top-level "utils" module; drop the editor's copy.
+    for k in [k for k, v in list(sys.modules.items()) if "ChordEdit-Reproduction" in str(getattr(v, "__file__", "") or "")]:
+        del sys.modules[k]
+    sys.modules.pop("utils", None)
+    sys.path[:] = [q for q in sys.path if "ChordEdit-Reproduction" not in q]
     spec = importlib.util.spec_from_file_location("ev", Path(__file__).resolve().parent / "03_evaluate.py")
     ev = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ev)
@@ -86,7 +91,8 @@ def main() -> None:
 
     strip = bool(settings.raw["grid"].get("strip_brackets", False))
     base = settings.base_edit_config()
-    pipe = load_pipeline(settings, fake=args.fake, device=args.device)
+    todo = any(not grid_image_path(settings, c, NEW_SEED, by_id[s].rel_path).exists() for s, c in pairs)
+    pipe = load_pipeline(settings, fake=args.fake, device=args.device) if todo else None
     pie_root = settings.path("pie_root")
     for k, (s, cid) in enumerate(pairs):
         it = by_id[s]
