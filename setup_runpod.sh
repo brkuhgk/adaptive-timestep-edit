@@ -34,4 +34,4 @@ if [ ! -f datasets/PIE-Bench_v1/mapping_file.json ]; then
 fi
 
 python -c "import torch; print('torch', torch.__version__, 'cuda', torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else '')"
-echo "Setup done. Next: bash pod_bootstrap.sh "<PIE-Bench link>"  (does everything), or run_all.sh / run_parallel.sh by hand"
+echo 'Setup done. Next: bash pod_bootstrap.sh <PIE-Bench link>  (does everything), or run_all.sh / run_parallel.sh by hand'
