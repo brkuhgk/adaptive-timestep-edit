@@ -10,7 +10,9 @@ What I found: prompt type barely predicts the best timestep. Category rules and 
 
 So the signal looks image-level, not prompt-level. Next I'm testing cheap image features (edit-mask area, probe-curve shape) to predict it.
 
-Code, numbers and a short note: [link]. I'd value your view on whether this is useful to the lab.
+Code, every per-image number and a short note: https://github.com/brkuhgk/adaptive-timestep-edit
+
+I'd value your view on whether this is useful to the lab.
 
 Best,
 [Name]
