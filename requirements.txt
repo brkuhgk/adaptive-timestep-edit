@@ -1,0 +1,10 @@
+# In addition to ext/ChordEdit-Reproduction/requirement.txt (torch, diffusers, transformers, torchmetrics, ...)
+numpy
+pandas>=2.0
+scipy
+matplotlib
+pyyaml
+huggingface_hub[cli]
+accelerate
+lpips
+pytest

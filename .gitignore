@@ -1,0 +1,7 @@
+work/
+work_fake/
+ext/
+checkpoints/
+datasets/
+__pycache__/
+*.pyc

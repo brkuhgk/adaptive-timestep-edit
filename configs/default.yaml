@@ -1,0 +1,52 @@
+# Prompt-adaptive timestep selection for one-step ChordEdit editing.
+# All relative paths are resolved against the kit root (the folder holding this configs/ dir).
+
+paths:
+  lab_repo: ext/ChordEdit-Reproduction     # Harvard-AI-and-Robotics-Lab/ChordEdit-Reproduction
+  eval_repo: ext/PnPInversion              # Harvard-AI-and-Robotics-Lab/PnPInversion (PIE-Bench evaluator)
+  model_root: checkpoints/sd-turbo         # stabilityai/sd-turbo (unet/ scheduler/ text_encoder/ tokenizer/ vae/)
+  pie_root: datasets/PIE-Bench_v1          # must contain annotation_images/ and mapping_file.json
+  work_dir: work                           # all generated images, CSVs, figures
+
+# Edit configurations to sweep. Every (t_start, t_end, t_delta, cleanup) combination is one config.
+# t_start = timestep of the coarse "chord transport" step (high noise = coarse, low-frequency edits)
+# t_end   = timestep of the proximal clean-up / refinement step (low noise = fine detail)
+grid:
+  t_start: [0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0]
+  t_end: [0.1, 0.2, 0.3, 0.4]
+  t_delta: [0.0]          # the reproduction study shows delta acts mainly as a timestep shift; 0 = simplified
+  cleanup: [true]
+  extra:                  # reference configurations from the papers (deduplicated against the grid)
+    - {name: paper_default, t_start: 0.9, t_end: 0.3, t_delta: 0.15, cleanup: true}
+    - {name: paper_simplified, t_start: 0.75, t_end: 0.3, t_delta: 0.0, cleanup: true}
+  seeds: [42, 43, 44]     # use --quick to run only the first seed
+  noise_samples: 1
+  n_steps: 1
+  step_scale: 1.0
+  strip_brackets: false   # false = feed PIE prompts exactly as the lab's run_pie_bench.py does (with [ ] markers)
+
+reference_config: paper_default   # the "fixed timestep" baseline the gap is measured from
+
+split:
+  dev_fraction: 0.3       # stratified by edit category; everything is tuned on dev, reported on test
+  seed: 0
+
+objective:                # scalar score J used to pick "best" configs (all metrics z-scored on dev)
+  edit_weight: 1.0        # mean of z(CLIP whole) and z(CLIP edited region)
+  preserve_weight: 1.0    # mean of z(background PSNR), -z(background LPIPS), -z(structure distance)
+  sensitivity: [0.5, 1.0, 2.0]   # preserve_weight values re-run in the sensitivity table
+
+probe:
+  t_candidates: [0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0]
+  noise_samples: 2        # K noises per timestep; >=2 enables the direction-consistency statistic
+  chunk: 14               # UNet batch size for the probe forward passes
+  taus: [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+
+classifier:
+  use_llm: true
+  model: Qwen/Qwen2.5-1.5B-Instruct
+  max_new_tokens: 4
+
+bootstrap:
+  n: 2000
+  seed: 0
