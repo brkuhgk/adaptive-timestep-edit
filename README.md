@@ -22,6 +22,21 @@ The velocity probe measures where the target- and source-prompt predictions star
 
 **Every edit runs through the lab's own pipeline** (`ext/ChordEdit-Reproduction`), and every metric through the lab's own PIE-Bench evaluator (`ext/PnPInversion`). This project only decides *which timesteps* to run with. Everything is tuned on a stratified **dev** split (30%) and reported on the held-out **test** split, with paired bootstrap confidence intervals.
 
+## Results of the first full run (Nov 21–22, 2026)
+
+700 PIE-Bench images × 29 settings, seed 42, one RTX 4090 (0.5 s per edit, about 3.5 GPU-hours). The full write-up is in `report/report.md`.
+
+1. **The reproduction matches.** At the paper default, CLIP-edited is 22.30 and background PSNR 22.76 dB. The lab's reproduction reports 22.16 and about 22.6.
+2. **The combined score J can be gamed.** It is maximized by the gentlest setting (t_start 0.5, t_end 0.1), which simply edits less (CLIP-edited 20.76). So the auto-filled "gap closed %" in `main_table.md` is **not** evidence. `scripts/08_constrained_analysis.py` compares methods at matched edit strength instead.
+3. **At matched strength, prompt-level rules only trade.**
+   - Category tables: −0.16 CLIP-edited for +0.53 dB background PSNR.
+   - Velocity probe: +0.28 CLIP-edited for −1.17 dB.
+4. **The per-image choice is real for the background.** `scripts/09_heldout_seed.py` re-runs the oracle's seed-42 choices with seed 43:
+   - The background gain holds: +1.47 → +1.40 dB [CI +1.17, +1.64].
+   - The edit-strength gain was seed noise: +0.73 → −0.17.
+
+![Matched-strength comparison](report/fig_tradeoff.png)
+
 ## Cost and time (RTX 4090 24 GB)
 
 | Stage | Work | Time (1 seed) | Time (3 seeds) |
@@ -32,7 +47,7 @@ The velocity probe measures where the target- and source-prompt predictions star
 | LLM classifier | 700 prompt pairs | ≈ 5 min | ≈ 5 min |
 | **Total** | | **≈ 5–6 h, ≈ $2–4** | **≈ 15–18 h, ≈ $6–12** |
 
-The time per edit is the lab's reported ~0.5 s (A6000); metric time is an estimate, and `work/results/timing_grid.csv` logs the real numbers. Prices are RunPod on-demand rates (RTX 4090 from about $0.34/h). Allow 30 GB of disk; the edited images are about 3 GB per seed.
+Measured on the first run: 0.50 s per edit per worker with 2 workers on one RTX 4090, and 0.70 s per image for the probe. The whole 1-seed study took about 3.5 GPU-hours. **Terminate the pod as soon as the run ends: an idle pod bills by the hour.** The held-out-seed check (script 09) adds about 15 minutes. Prices are RunPod on-demand rates (RTX 4090 from about $0.34/h). Allow 30 GB of disk; the edited images are about 3 GB per seed.
 
 ## Steps
 
@@ -68,6 +83,15 @@ Run it inside `tmux` so it survives a dropped connection. If the pod restarts, r
 - `sensitivity.csv`: whether the conclusion holds when the score weights preservation 0.5× / 1× / 2×.
 - `probe_tuning.csv`, `classifier.csv`, `timing_grid.csv`: details.
 
+**4. Run the two checks that matter** (CPU for 08; about 15 GPU-minutes for 09):
+
+```bash
+python scripts/08_constrained_analysis.py            # matched edit strength -> constrained_results.json
+python scripts/09_heldout_seed.py --shard 0/2 &      # re-run the oracle's choices with a new seed
+python scripts/09_heldout_seed.py --shard 1/2; wait
+python scripts/09_heldout_seed.py --report           # -> heldout_seed.json
+```
+
 **Smoke test without a GPU** (about 30 s, no downloads; checks that the code runs, not the results): `bash run_all.sh --fake`, then `pytest -q`.
 
 ## How "best" is defined
@@ -88,16 +112,19 @@ Every table also reports the raw PIE-Bench metrics, so no conclusion depends onl
 
 - **Prompt brackets.** The lab's `run_pie_bench.py` feeds PIE prompts *with* their `[ ]` blend markers, and so does this repo by default, to match the lab. Set `grid.strip_brackets: true` to run the clean-prompt variant as a check.
 - **Narrow setup.** It is one model (SD-Turbo), one benchmark (PIE-Bench) and automatic metrics only.
-- **A negative result still counts.** If a fixed global best already closes most of the gap, the table will say so.
+- **A negative result still counts.** On the first run, J was gamed by editing less, and prompt-level rules did not beat the default at matched strength (see Results above).
+- **The LLM classifier collapsed.** Qwen2.5-1.5B labels 69% of prompts "change content" (13% accuracy). Use a larger model or constrained decoding before trusting its rows.
+- **Whole-image masks.** Background metrics are undefined when the edit mask covers the whole frame (mostly "change style"); those images drop out of the background numbers.
 
 ## Layout
 
 ```
 ate/            library: config grid, PIE loading/splits, lab-pipeline wrapper + probe, objective, analysis, plots
-scripts/01..07  numbered, resumable stages (run_all.sh runs 01-06)
+scripts/01..09  numbered, resumable stages (run_all.sh runs 01-06; 08 = matched-strength analysis, 09 = held-out-seed check)
 configs/        default.yaml (grid, seeds, split, objective weights, probe settings)
 tests/          unit tests (mask decoding matches the lab evaluator, probe equals ChordEdit's update, oracles, ...)
-report/         report.md draft (4 pages) + email_template.txt; scripts/07 fills both from summary.json
+report/         report.md (the note, with results) + fig_tradeoff.png + email_template.txt
+results/        image_features.csv (per-image edit-mask area and prompt-change counts, for the next-step analysis)
 ```
 
 ## Credits

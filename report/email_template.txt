@@ -1,14 +1,16 @@
-Subject: Prompt-adaptive timesteps for one-step editing, following your ChordEdit study
+Subject: Per-image timesteps for one-step ChordEdit: a small PIE-Bench study
 
 Dear Prof. Li,
 
-I'm [Name], a [role] applying to the Mines CS PhD for Fall 2027; I submitted the MAI Lab application form on [date].
+I'm [Name], a [role] applying to the Mines CS PhD for Fall 2027. I submitted the MAI Lab application form on [date].
 
-Your ChordEdit reproduction study suggested prompt-conditioned timestep selection as a next step, so I tried it. On PIE-Bench with SD-Turbo, sweeping {{n_configs}} timestep settings shows the best transport timestep moves from t={{lowest_t_category_t:.2f}} for {{lowest_t_category_name}} edits to t={{highest_t_category_t:.2f}} for {{highest_t_category_name}} edits. Choosing it per edit with {{best_practical_method_short}} closes {{best_practical_gap_closed_%:.0f}}% of the gap between your default setting and a per-image oracle on a held-out split (paired 95% CI on the gain: [{{best_practical_dJ_lo:.2f}}, {{best_practical_dJ_hi:.2f}}]). [One honest caveat, e.g. "a single re-tuned global timestep already recovers most of that, so the adaptive part is modest" or "it does not help delete-object edits."]
+Your ChordEdit reproduction suggested prompt-conditioned timestep selection, so I tested it on all 700 PIE-Bench images with SD-Turbo, using your pipeline and evaluator (29 timestep settings; your default reproduces at CLIP-edited 22.30 vs. 22.16 in your repo).
 
-Code, all outputs, per-image metrics and a 4-page note: [link]. Next I'd like to try the same idea with Wan-Edit on FiVE-Bench.
+What I found: prompt type barely predicts the best timestep. Category rules and a training-free velocity-disagreement probe only trade edit strength for background quality. Per image, though, there is real headroom: the best setting for each image keeps about +1.1 dB background PSNR at equal edit strength, and that gain holds when I re-run with a new seed. The apparent edit-strength gain was seed noise.
 
-I'd be glad to hear whether this direction is useful to the lab.
+So the signal looks image-level, not prompt-level. Next I'm testing cheap image features (edit-mask area, probe-curve shape) to predict it.
+
+Code, numbers and a short note: [link]. I'd value your view on whether this is useful to the lab.
 
 Best,
 [Name]

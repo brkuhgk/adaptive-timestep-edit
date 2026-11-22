@@ -1,48 +1,50 @@
 ---
-title: "Choosing the Noise Level from the Prompt: Adaptive Timesteps for One-Step Image Editing"
+title: "Does the Prompt Choose the Timestep? Adaptive Timesteps for One-Step ChordEdit on PIE-Bench"
 author: "[Your Name] ([email] · [GitHub])"
-date: "December 2026"
+date: "November 2026"
 ---
 
-<!-- Draft. Run `python scripts/07_fill_report.py` after the study to replace every {{placeholder}} from
-work/results/summary.json and main_table.md. Rewrite the Results and Discussion sections in your own words
-once you have looked at the numbers and images. Convert with: pandoc report_filled.md -o report.pdf -->
+<!-- Results from the first full run (Nov 21–22, 2026): 700 images x 29 settings, seed 42, plus a held-out
+seed-43 check of the per-image oracle. Numbers come from work/results/{main_table.csv, sensitivity.csv,
+constrained_results.json, heldout_seed.json}. Convert with: pandoc report.md -o report.pdf -->
 
 ## Abstract
 
-One-step editors such as ChordEdit apply a single transport step at a fixed noise level, then a refinement step at a lower one. A recent reproduction study found two things. The chord window mainly acts as a timestep shift. High-noise steps make coarse, low-frequency changes, and low-noise steps add fine detail. The study proposed choosing the timestep from the prompt as a next step [Li et al. 2026].
+A recent reproduction of ChordEdit, a one-step image editor, proposed choosing the editing timestep from the prompt [Li et al. 2026]. We test that proposal on all 700 PIE-Bench images with SD-Turbo, using the lab's pipeline and evaluator.
 
-We test that proposal on PIE-Bench with SD-Turbo. First, we sweep {{n_configs}} timestep configurations over all 700 images to measure how much quality a fixed setting leaves on the table. Second, we compare three cheap ways to choose the timesteps per edit:
+- **Sweep.** We sweep 29 (t_start, t_end) settings and reproduce the paper default (CLIP-edited 22.30 vs. 22.16 in the lab's reproduction).
+- **Predictors.** We compare per-category tables, prompt classifiers and a training-free velocity probe, all tuned on a dev split and scored on 490 test images.
 
-- a category table, applied with the true category label or with one predicted from the prompt pair;
-- a small-LLM edit-type classifier;
-- a training-free **velocity probe**, which finds the smallest noise level at which the target and source prompts' predictions disagree.
+We report three findings:
 
-Everything is tuned on a dev split and reported on a held-out test split of {{n_test}} images. The best practical predictor, {{best_practical_method}}, closes **{{best_practical_gap_closed_%:.0f}}%** of the gap between the paper's default and a per-image oracle. Its score gain is ΔJ = {{best_practical_dJ:.3f}} (95% CI [{{best_practical_dJ_lo:.3f}}, {{best_practical_dJ_hi:.3f}}]), at a cost of {{best_practical_extra_unet_calls:.0f}} extra batched UNet evaluations.
+1. A naive edit-plus-preservation score can be gamed by editing less, so we compare methods at matched edit strength.
+2. At matched strength, no prompt-level rule beats the paper default. Category tables and the probe only move along the edit/background trade-off.
+3. The per-image best setting does help. It improves background PSNR by +1.40 dB [95% CI +1.17, +1.64] at equal edit strength, and this gain **survives a fresh random seed**. Its apparent edit-strength gain does not.
+
+The useful signal for timestep choice therefore seems to be a property of the image, not of the prompt type.
 
 ## 1. Introduction
 
-Choosing the noise level is the oldest trade-off in diffusion editing. In SDEdit [Meng et al. 2022], more noise buys editability at the cost of faithfulness to the source. Few-step and one-step editors make the choice starker, because there is no trajectory to spread the change over.
+Choosing the noise level is the oldest trade-off in diffusion editing. In SDEdit [Meng et al. 2022], more noise buys editability at the cost of faithfulness to the source. One-step editors make the choice starker, because there is no trajectory to spread the change over.
 
 ChordEdit [Lu et al. 2026] performs a single "chord" transport step at t_start and a proximal clean-up at t_end. Its reproduction study [Li et al. 2026] made three findings:
 
-- The chord window δ acts largely as an effective shift from t to t − δ.
-- Setting δ = 0, t_start = 0.75 roughly matches the default.
-- Transport at high noise performs low-frequency semantic edits, while alignment at low noise adds high-frequency detail.
+- the chord window δ acts largely as a shift from t to t − δ;
+- δ = 0 with t_start ≈ 0.75 roughly matches the default;
+- transport at high noise makes low-frequency semantic changes, while low noise adds high-frequency detail.
 
-The study proposed *prompt-conditioned dynamic timestep selection* but did not test it.
+The study proposed *prompt-conditioned dynamic timestep selection* as future work. We ask:
 
-We ask three questions:
-
-1. How much does the best timestep vary across edits?
-2. How much quality does a fixed setting lose?
-3. How cheaply can that quality be recovered?
+1. How much does the best timestep vary across images?
+2. Can that variation be predicted cheaply from the prompt, or from the model's own response to it?
+3. Which part of any apparent gain is real, and which is selection noise?
 
 Our contributions:
 
-1. A full sweep of (t_start, t_end) on PIE-Bench, with dev/test splits, multiple seeds, paired bootstrap intervals and a held-out-seed oracle that avoids winner's-curse optimism.
-2. A training-free probe that turns the model's own prompt disagreement into a timestep, with a short argument for why it should work.
-3. All code, outputs and per-image metrics, released so others can rerun every number.
+- A full (t_start, t_end) sweep on PIE-Bench with a dev/test split and paired bootstrap CIs.
+- A **matched-strength** comparison that removes the "edit less" loophole of combined scores.
+- A **held-out-seed** test of the per-image oracle, which separates real per-image headroom from winner's-curse noise.
+- All code, per-image metrics and analysis scripts.
 
 ## 2. Related work
 
@@ -50,103 +52,164 @@ Our contributions:
 
 **One-step editing.** ChordEdit [Lu et al. 2026] builds on adversarially distilled models such as SD-Turbo [Sauer et al. 2023]. The reproduction study [Li et al. 2026] is our starting point.
 
-**Prompt-aware editing.** SplitFlow [Yoon et al. 2025] uses an LLM to split prompts into sub-edits. Our LLM classifier borrows that idea to choose timesteps instead.
+**Prompt-aware editing.** SplitFlow [Yoon et al. 2025] uses an LLM to split prompts into sub-edits. Our LLM classifier borrows the idea to choose timesteps instead.
 
-**Evaluation.** We use PIE-Bench [Ju et al. 2024] with the metrics and evaluator used by the ChordEdit reproduction.
+**Evaluation.** We use PIE-Bench [Ju et al. 2024] with the evaluator used by the ChordEdit reproduction.
 
 ## 3. Method
 
-**Setup.** Let x be the source latent, c_s and c_t the source and target prompts, z_t = α_t x + σ_t ε, and x̂₀(z_t, c) = (z_t − σ_t ε̂(z_t, t, c)) / α_t the model's clean-image prediction.
-
-With δ = 0, ChordEdit's transport update is
+**Setup.** Let x be the source latent, c_s and c_t the source and target prompts, z_t = α_t x + σ_t ε, and x̂₀(z_t, c) = (z_t − σ_t ε̂(z_t, t, c)) / α_t the model's clean-image prediction. With δ = 0, ChordEdit's transport update is
 
 ```latex
 u(t) = \mathbb{E}_{\epsilon}\left[\hat{x}_0(z_t, c_t) - \hat{x}_0(z_t, c_s)\right], \qquad x' = x + u(t_{\text{start}})
 ```
 
-The clean-up step then returns x̂₀(α_{t_end} x′ + σ_{t_end} ε, c_t). The probe computes exactly the bracketed difference, d(t), at a set of candidate timesteps.
+The clean-up step returns x̂₀(α_{t_end} x′ + σ_{t_end} ε, c_t).
 
-**Why the right t depends on the edit.** By Tweedie's formula, x̂₀(z_t, c) approximates E[x₀ | z_t, c], so d(t) is the difference between two posterior means, one for each prompt. For small σ_t, any image consistent with z_t must be close to x, so both posteriors collapse onto x and d(t) → 0. The edit is not yet reachable.
+**The hypothesis behind a probe.** By Tweedie's formula, x̂₀(z_t, c) approximates E[x₀ | z_t, c], so d(t) = x̂₀(z_t, c_t) − x̂₀(z_t, c_s) is a difference of two posterior means. Two cases follow:
 
-Adding Gaussian noise of variance σ_t² hides every frequency band whose signal power falls below roughly σ_t²/α_t². Natural images have a power spectrum that falls roughly as 1/f², so the hidden band grows from fine to coarse as t increases. An edit becomes expressible once the band it must change is hidden:
+- **Small σ_t.** Both posteriors collapse onto x, so d(t) → 0: the edit is not yet reachable.
+- **Growing σ_t.** Noise hides frequency bands from fine to coarse, because natural-image power falls roughly as 1/f². So an edit should become reachable once the band it must change is hidden. That suggests low t for texture edits and high t for color, layout and style.
 
-- fine-texture and small-detail edits become reachable at low t;
-- color, layout and style edits, which live at low frequencies, need high t.
+**Velocity probe.** The probe measures s̄(t) = RMS(E_k d_k(t)) at 7 candidate timesteps, with 2 noise draws and both prompts. That is 28 UNet evaluations, batched, taking 0.70 s per image (an edit takes 0.50 s). Two rules turn the curve into a timestep, with τ and t_end chosen on dev:
 
-Beyond that point, extra noise only hides more of the background, which the model may re-imagine. This is the drift the preservation metrics penalize. The reproduction study's coarse/fine finding is the same picture seen from the output side.
+- **Knee rule:** pick the smallest t with s̄(t) ≥ τ · max s̄.
+- **Consistency rule:** maximize s(t)·ρ(t), where ρ is the agreement of d across noise draws.
 
-**Rules for choosing t.** Two rules follow from this picture:
+**Category baselines.** A table maps each PIE category to its dev-best setting. It is applied in three ways:
 
-- **Knee rule:** choose the smallest t at which the magnitude of the applied update, s̄(t) = RMS(E_k d_k(t)), reaches a fraction τ of its maximum over the candidates. This is the lowest noise at which the edit is already expressible.
-- **Consistency rule:** choose the t that maximizes s(t)·ρ(t), where ρ is the cosine agreement of d across noise draws. This favors strong *and* reproducible edit directions.
+- with the true label, an upper bound for any prompt classifier;
+- with a keyword rule over the prompt word-diff;
+- with Qwen2.5-1.5B-Instruct used few-shot.
 
-τ and the rule itself are tuned on the dev split. t_end is set to the dev-best value for the chosen t_start.
+**Two ways to score.**
 
-**Cost.** The probe batches |T| candidates × K = 2 noises × 2 prompts = {{probe_unet_calls:.0f}} UNet evaluations into a single forward pass. That measured **{{probe_seconds_per_image:.2f}} s per image**, against about 0.5 s for the edit itself.
+1. **Combined score J.** J adds an edit term to a preservation term, each built from metrics z-scored on dev:
+   - edit term: CLIP of the whole image and of the edited region;
+   - preservation term: background PSNR, −LPIPS and −structure distance.
+2. **Matched strength.** Because J can rise by editing less (Section 5.2), we also compare methods under constraints:
+   - **(A) Same edit strength:** a setting is eligible only if both CLIP scores are at least the default's on dev. Among those, choose the cleanest background.
+   - **(B) Same background:** a setting is eligible only if background PSNR ≥ and LPIPS ≤ the default's. Among those, choose the strongest edit.
 
-**Category baselines.** A table maps each PIE edit category to its dev-best configuration. It is applied with the true label (an upper bound for any prompt classifier), with a keyword rule over the prompt word-diff, and with a 1.5B instruct LLM (Qwen2.5-1.5B-Instruct, few-shot). The classifiers reach {{keyword_classifier_acc_%:.0f}}% and {{llm_classifier_acc_%:.0f}}% accuracy respectively.
+**Held-out seed.** For each test image, the per-image oracle picks the best setting from its seed-42 scores. That is optimistic: with 29 noisy candidates, the maximum is biased upward. We therefore re-ran the oracle's choices and the default with seed 43 (1,075 new edits) and measured the paired difference again.
 
 ## 4. Experimental setup
 
 **Model and data.**
 
-- **Model:** SD-Turbo, run through the lab's ChordEdit reproduction pipeline (fp32, 512², one noise sample, one step, clean-up on).
-- **Data:** PIE-Bench, 700 images in 10 edit categories.
+- **Model:** SD-Turbo through the lab's ChordEdit reproduction pipeline (fp32, 512², one noise sample, clean-up on).
+- **Data:** PIE-Bench, 700 images in 10 edit categories. Prompts are passed with their bracket markers, as in the lab's script.
 
 **Grid.**
 
-- t_start ∈ {0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0}, t_end ∈ {0.1, 0.2, 0.3, 0.4}, δ = 0.
-- Plus the paper default (0.9, 0.3, δ = 0.15), for {{n_configs}} configurations in total.
-- Seeds {{seeds}}.
+- t_start ∈ {0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1.0} and t_end ∈ {0.1, 0.2, 0.3, 0.4}, with δ = 0.
+- Two more settings: the paper default (0.9, 0.3, δ = 0.15) and the simplified setting (0.75, 0.3, 0).
+- 29 settings × 700 images = 20,300 edits with seed 42. This took about 3.5 hours on one RTX 4090.
 
-**Metrics.** Structure distance; background PSNR, LPIPS and SSIM; and CLIP similarity of the whole image and the edited region. All are computed with the lab's PIE-Bench evaluator.
+**Metrics.** All metrics come from the lab's PIE-Bench evaluator:
 
-**Score.** J is the edit term plus the preservation term, each built from metrics z-scored on dev (README, "How best is defined"). `sensitivity.csv` reports the conclusions with the preservation term weighted 0.5×, 1× and 2×.
+- structure distance (DINO);
+- background PSNR, LPIPS and SSIM;
+- CLIP similarity of the whole image and of the edited region.
 
-**Protocol.** The split is stratified by category: {{n_dev}} images for dev, {{n_test}} for test. All choices are fit on dev. 95% CIs come from a paired bootstrap over test images (2,000 resamples).
+Images whose edit mask covers the whole frame (mostly "change style") have no background, so they drop out of the background averages.
 
-**Oracles.**
+**Protocol.**
 
-- In-sample per-image oracle: J = {{oracle_in_sample_J:.3f}}.
-- Held-out-seed oracle, which selects on seed 42 and scores on the other seeds: J = {{oracle_held_out_seed_J:.3f}}.
-- Paper default, for reference: J = {{reference_J:.3f}}.
+- **Split:** stratified by category, 210 dev and 490 test images. Every choice is fit on dev.
+- **Uncertainty:** 95% CIs from a paired bootstrap over test images (2,000 resamples).
 
 ## 5. Results
 
-**Table 1.** Test split; methods tuned on dev.
+### 5.1 The reproduction matches
 
-{{MAIN_TABLE}}
+At the paper default, CLIP-edited is 22.30, background PSNR 22.76 dB and LPIPS 0.116. The lab's reproduction reports 22.16 CLIP-edited and about 22.6 dB; the original paper reports 22.96.
 
-**Is there a gap?** The per-image oracle beats the paper default by ΔJ = {{oracle_gap:.3f}}. The best *single* configuration on dev ({{global_best_config}}) already recovers part of that gap. [Describe: how much is left after that, and whether the CI excludes zero.]
+### 5.2 A combined score rewards editing less
 
-**Does the best timestep depend on the edit?** Yes or no; see Figure 1. The best t_start ranges from {{lowest_t_category_t:.2f}} for *{{lowest_t_category_name}}* to {{highest_t_category_t:.2f}} for *{{highest_t_category_name}}*. [Compare with the coarse/fine prediction of Section 3: are color and background edits high-t, and texture or pose edits low-t?]
+Under J with equal weights, the best single setting on dev is the gentlest one in the grid, (t_start 0.5, t_end 0.1).
 
-**Predictors.** Figure 2 shows how much of the oracle gap each predictor closes. [Say which predictor wins, and whether the probe beats the zero-cost category rule. The rank correlation between the probe's mean knee and the best t_start, across categories, is ρ_s = {{spearman_knee_vs_best_t_by_category:.2f}}.]
+- **Its score:** ΔJ = +0.46 [+0.40, +0.52] over the default.
+- **What it does:** background PSNR rises to 27.73 dB and LPIPS falls to 0.055, but CLIP-edited drops to 20.76.
+- **Category tables add nothing:** every category picks the same setting, so the tables reduce to it.
 
-**CLIP-edited.** For reference:
+That is a weaker edit, not a better one, and it sits on the edge of the grid. With the preservation weight halved, nothing beats the default: the best fixed setting gives ΔJ = +0.03 [−0.02, +0.07] and the probe −0.02 [−0.06, +0.02]. We therefore do not read J-based "gap closed" numbers as evidence.
 
-- The best practical method reaches {{best_practical_clip_edited:.2f}}.
-- The original paper reports {{paper_clip_edited:.2f}} for ChordEdit.
-- The lab's reproduction reports {{lab_repro_clip_edited:.2f}}.
+### 5.3 At matched strength, prompt-level rules only trade
 
-![Figure 1. Edit score by category and t_start (row-centered; box = best).](../work/results/fig_heatmap.png)
+**Table 1.** Constraint (A), same edit strength. Change vs. the paper default on 490 test images.
 
-![Figure 2. Gain over the paper default, with the share of the oracle gap closed.](../work/results/fig_gap_closed.png)
+| Method | Δ CLIP-edited | Δ BG PSNR (dB) | Δ BG LPIPS |
+| --- | --- | --- | --- |
+| Best single setting (dev) | 0 (= default) | 0 | 0 |
+| Category table, true label | −0.16 [−0.29, −0.03] | +0.53 [+0.39, +0.70] | −0.007 |
+| Keyword classifier → table | −0.20 [−0.34, −0.06] | +0.43 [+0.30, +0.58] | −0.005 |
+| Velocity probe (knee, τ = 0.6) | +0.28 [+0.10, +0.47] | −1.17 [−1.39, −0.95] | +0.013 |
+| Per-image oracle (seed 42, in-sample) | +0.73 [+0.64, +0.83] | +1.47 [+1.27, +1.68] | −0.021 |
 
-![Figure 3. Probe signal: normalized prompt disagreement vs. timestep, by category.](../work/results/fig_probe_curves.png)
+Three points stand out:
 
-## 6. Limitations and next steps
+- **The default is already the best fixed setting at its own edit strength.** No other fixed setting matches its CLIP scores with a cleaner background.
+- **The category tables lose edit strength on test.** They meet the constraint on dev but not on test, because each is fit on about 21 dev images.
+- **The probe moves the other way.** It buys edit strength with background quality.
+
+Constraint (B) tells the same story. The category table gives −0.10 [−0.19, −0.02] CLIP-edited for +0.48 dB. The best fixed setting, (0.7, 0.3), gives −0.20 [−0.38, −0.02] for +0.26 dB.
+
+### 5.4 The held-out seed separates signal from noise
+
+**Table 2.** Per-image oracle: chosen on seed 42, then re-run on seed 43. Change vs. the default at the same seed.
+
+| Oracle | Metric | Seed 42 (in-sample) | Seed 43 (held out) |
+| --- | --- | --- | --- |
+| (A) same edit strength | Δ CLIP-edited | +0.73 [+0.64, +0.83] | −0.17 [−0.34, +0.00] |
+| | Δ BG PSNR (dB) | +1.47 [+1.27, +1.68] | +1.40 [+1.17, +1.64] |
+| | Δ BG LPIPS | −0.021 | −0.022 [−0.025, −0.018] |
+| (B) same background | Δ CLIP-edited | +1.16 [+1.02, +1.30] | +0.04 [−0.12, +0.20] |
+| | Δ BG PSNR (dB) | +1.28 [+1.13, +1.43] | +1.14 [+0.95, +1.35] |
+
+**The edit-strength gains vanish on the new seed.** They came from picking the luckiest of 29 noisy edits.
+
+**The background gains hardly move.** They hold at +1.1 to +1.4 dB PSNR, with LPIPS and structure distance improving as well, all with CIs away from zero.
+
+So for a given image, some settings reliably protect its background better than the default does, at no measurable cost in edit strength. That property belongs to the image, not to the seed.
+
+### 5.5 Why the prompt-level predictors miss it
+
+- **Category curves nearly coincide.** The normalized probe curves of the 10 categories almost overlap (Figure 1). The mean knee timestep ranges only from 0.68 (change object) to 0.78 (change color).
+- **The probe measures the wrong thing.** It measures where the two prompts' predictions diverge, which is reachability of the edit. Reachability tracks edit strength, not risk to the background, so tuning the probe pushes toward stronger edits (Table 1).
+- **The classifiers are weak.**
+  - The keyword rule is 48% accurate.
+  - The 1.5B LLM collapsed: it assigns 69% of prompts to "change content" (13% accuracy, near chance). Its rows are omitted; it needs a larger model or constrained decoding.
+- **Category labels would not help anyway.** Even with the true label, the per-category tables do not transfer from dev to test.
+
+![Figure 1. Probe signal: normalized prompt disagreement vs. timestep, by category (from work/results).](../work/results/fig_probe_curves.png)
+
+![Figure 2. Matched edit strength (constraint A): change in edit strength vs. background PSNR, with 95% CIs.](fig_tradeoff.png)
+
+## 6. Discussion
+
+The coarse/fine picture of Section 3 predicts *when an edit becomes reachable*. That is a property of the edit type, and the probe does recover it. But the reachable range turns out to be broad for every category. Across that range, what varies between images is how much of the *unedited* region the model repaints, and that is what the per-image oracle exploits.
+
+This points to a different predictor. Instead of asking "which kind of edit is this?", it should ask "how fragile is this image's background at this noise level?" Candidate inputs:
+
+- the edit-mask area;
+- texture and contrast statistics of the unedited region;
+- the source-prompt reconstruction error x̂₀(z_t, c_s) − x at each t, which the probe already computes for free.
+
+## 7. Limitations and next steps
 
 **Limitations.**
 
-- **Narrow setup.** The study covers one model (SD-Turbo), one benchmark (PIE-Bench) and automatic metrics only. CLIP-based edit scores are known to reward prompt keywords rather than faithful edits. A small human or VLM study, in the style of FiVE-Acc, would strengthen the claims.
-- **What J rewards.** J weights edit and preservation equally. The sensitivity table shows whether the ranking survives other weightings.
-- **Prompt formatting.** We feed PIE prompts as the lab's script does, with bracket markers. A clean-prompt run is a one-line config change.
+- **Seeds:** one seed for the grid, plus one held-out seed for the oracle.
+- **Metrics:** automatic only. CLIP-based scores can reward prompt keywords over faithful edits; a small human or VLM study would strengthen the claims.
+- **Grid:** it stops at t_start = 0.5, and the combined score's optimum lies on that edge.
+- **Oracle:** it needs all 29 edits of an image. It is an upper bound, not a method.
 
 **Next steps.**
 
-- **Video.** The same probe applies to rectified-flow video editors such as Wan-Edit on FiVE-Bench [Li et al. 2025], where a single shift schedule is currently used for all edits.
-- **Optimizing the step itself.** The probe's disagreement curve is the quantity that DDS, FlowEdit and Delta Rectified Flow Sampling integrate over time. Choosing *where* to evaluate it, rather than integrating it uniformly, may generalize beyond one-step editing.
+1. **Predict background fragility.** Learn per-image "gentle vs. default" choices from cheap image-level signals (above), trained on dev and evaluated on test with a fresh seed.
+2. **Strengthen the sweep.** Extend the grid below 0.5 and add two seeds.
+3. **Video.** Apply the same per-image analysis to rectified-flow video editing (Wan-Edit on FiVE-Bench [Li et al. 2025]), where one shift schedule is currently used for all edits.
 
 ## References
 

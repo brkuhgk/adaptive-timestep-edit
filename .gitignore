@@ -5,3 +5,4 @@ checkpoints/
 datasets/
 __pycache__/
 *.pyc
+work_local/
