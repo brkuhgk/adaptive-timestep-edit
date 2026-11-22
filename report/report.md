@@ -1,6 +1,6 @@
 ---
 title: "Does the Prompt Choose the Timestep? Adaptive Timesteps for One-Step ChordEdit on PIE-Bench"
-author: "[Your Name] ([email] · [GitHub])"
+author: "Karthik Boddu (github.com/brkuhgk)"
 date: "November 2026"
 ---
 
