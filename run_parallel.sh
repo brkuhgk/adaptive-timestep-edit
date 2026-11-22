@@ -13,9 +13,15 @@ if [[ $FAKE == 1 ]]; then NGPU=1; else NGPU=$(nvidia-smi -L | wc -l); fi
 W=${WORKERS_PER_GPU:-1}            # >1 overlaps work on one GPU (single-image editing leaves it mostly idle)
 [[ $FAKE == 1 ]] && W=2
 N=$((NGPU * W))
+# Pods report the HOST's core count (e.g. 96) but get only a few vCPUs; without a cap every worker starts ~96
+# threads and they fight. Measured on RTX 4090 / 8 vCPU: scoring 3.1 -> 7.2 rows/s with 4 threads per worker.
+CPUS=$(python -c "import os; print(len(os.sched_getaffinity(0)))" 2>/dev/null || nproc)
+[[ -r /sys/fs/cgroup/cpu.max ]] && read -r Q P < /sys/fs/cgroup/cpu.max && [[ "$Q" != "max" ]] && CPUS=$(( Q / P ))
+export OMP_NUM_THREADS=${OMP_NUM_THREADS:-$(( CPUS / N > 0 ? CPUS / N : 1 ))}
+export MKL_NUM_THREADS=${MKL_NUM_THREADS:-$OMP_NUM_THREADS}
 WORK=work; [[ $FAKE == 1 ]] && WORK=work_fake
 mkdir -p "$WORK/logs"
-echo "Using $NGPU GPU(s) x $W worker(s) = $N shards. Logs: $WORK/logs/"
+echo "Using $NGPU GPU(s) x $W worker(s) = $N shards, $OMP_NUM_THREADS CPU threads each. Logs: $WORK/logs/"
 
 "$PY" scripts/01_prepare.py "${ARGS[@]}"
 
