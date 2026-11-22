@@ -24,7 +24,7 @@ The velocity probe measures where the target- and source-prompt predictions star
 
 ## Results of the first full run (Nov 21–22, 2026)
 
-700 PIE-Bench images × 29 settings, seed 42, one RTX 4090 (0.5 s per edit, about 3.5 GPU-hours). The full write-up is in `report/report.md`.
+700 PIE-Bench images × 29 settings, seed 42, one RTX 4090 (0.5 s per edit, about 3.5 GPU-hours). The full write-up is in [`report/report.md`](report/report.md). **Every output of that run is in [`results/seed42/`](results/seed42/)**: per-image metrics for all 20,300 edits (`metrics_long.*.csv`), the held-out-seed metrics (`metrics_heldout.*.csv`), probe curves, classifier outputs, the dev/test split, tables, figures and logs.
 
 1. **The reproduction matches.** At the paper default, CLIP-edited is 22.30 and background PSNR 22.76 dB. The lab's reproduction reports 22.16 and about 22.6.
 2. **The combined score J can be gamed.** It is maximized by the gentlest setting (t_start 0.5, t_end 0.1), which simply edits less (CLIP-edited 20.76). So the auto-filled "gap closed %" in `main_table.md` is **not** evidence. `scripts/08_constrained_analysis.py` compares methods at matched edit strength instead.

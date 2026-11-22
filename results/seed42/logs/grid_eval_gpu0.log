@@ -1,0 +1,19 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-11-22 03:47:20,364 | INFO | [700/10500] ts0.50_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,400 | INFO | [1400/10500] ts0.50_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,436 | INFO | [2100/10500] ts0.60_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,472 | INFO | [2800/10500] ts0.60_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,508 | INFO | [3500/10500] ts0.70_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,544 | INFO | [4200/10500] ts0.70_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,581 | INFO | [4900/10500] ts0.75_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,617 | INFO | [5600/10500] ts0.75_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,653 | INFO | [6300/10500] ts0.80_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,689 | INFO | [7000/10500] ts0.80_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,725 | INFO | [7700/10500] ts0.90_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,761 | INFO | [8400/10500] ts0.90_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,796 | INFO | [9100/10500] ts1.00_te0.10_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,832 | INFO | [9800/10500] ts1.00_te0.30_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,867 | INFO | [10500/10500] ts0.90_te0.30_d0.15_c1 seed 42: 0 new edits, 0.000 s/edit
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Using cache found in /root/.cache/torch/hub/facebookresearch_dino_main
+2026-11-22 04:31:57,526 | INFO | Wrote 9330 new metric rows to /workspace/adaptive-timestep-edit/work/results/metrics_long.shard0of2.csv

@@ -182,7 +182,7 @@ So for a given image, some settings reliably protect its background better than 
   - The 1.5B LLM collapsed: it assigns 69% of prompts to "change content" (13% accuracy, near chance). Its rows are omitted; it needs a larger model or constrained decoding.
 - **Category labels would not help anyway.** Even with the true label, the per-category tables do not transfer from dev to test.
 
-![Figure 1. Probe signal: normalized prompt disagreement vs. timestep, by category (from work/results).](../work/results/fig_probe_curves.png)
+![Figure 1. Probe signal: normalized prompt disagreement vs. timestep, by category (from work/results).](../results/seed42/fig_probe_curves.png)
 
 ![Figure 2. Matched edit strength (constraint A): change in edit strength vs. background PSNR, with 95% CIs.](fig_tradeoff.png)
 

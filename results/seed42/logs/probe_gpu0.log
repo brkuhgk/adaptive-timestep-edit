@@ -1,0 +1,16 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-11-22 04:32:41,222 | INFO | probe 50/700 (0.69 s/image, 28 UNet evals)
+2026-11-22 04:33:16,026 | INFO | probe 100/700 (0.69 s/image, 28 UNet evals)
+2026-11-22 04:33:50,912 | INFO | probe 150/700 (0.69 s/image, 28 UNet evals)
+2026-11-22 04:34:25,856 | INFO | probe 200/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:35:00,832 | INFO | probe 250/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:35:35,791 | INFO | probe 300/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:36:10,702 | INFO | probe 350/700 (0.69 s/image, 28 UNet evals)
+2026-11-22 04:36:45,641 | INFO | probe 400/700 (0.69 s/image, 28 UNet evals)
+2026-11-22 04:37:20,559 | INFO | probe 450/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:37:55,481 | INFO | probe 500/700 (0.69 s/image, 28 UNet evals)
+2026-11-22 04:38:30,420 | INFO | probe 550/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:39:05,365 | INFO | probe 600/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:39:40,296 | INFO | probe 650/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:40:15,224 | INFO | probe 700/700 (0.70 s/image, 28 UNet evals)
+2026-11-22 04:40:15,225 | INFO | Probe written to /workspace/adaptive-timestep-edit/work/results/probe_long.csv

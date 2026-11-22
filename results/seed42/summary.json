@@ -1,0 +1,54 @@
+{
+  "n_test": 490,
+  "n_dev": 210,
+  "reference_config": "ts0.90_te0.30_d0.15_c1",
+  "global_best_config": "ts0.50_te0.10_d0.00_c1",
+  "oracle_in_sample_J": 1.0318896860894886,
+  "oracle_held_out_seed_J": null,
+  "reference_J": 0.27889048360445023,
+  "n_configs": 29,
+  "seeds": [
+    42
+  ],
+  "best_practical_method": "Prompt keywords -> category table",
+  "best_practical_gap_closed_%": 60.95939097119061,
+  "best_practical_dJ_ci": [
+    0.45902372785280177,
+    0.400338458862055,
+    0.5195675182670493
+  ],
+  "best_practical_extra_unet_calls": 0.0,
+  "best_practical_clip_edited": 20.756327106514757,
+  "paper_clip_edited": 22.96,
+  "lab_repro_clip_edited": 22.1554,
+  "best_t_start_by_category": {
+    "random": 0.5,
+    "change object": 0.5,
+    "add object": 0.5,
+    "delete object": 0.5,
+    "change content": 0.5,
+    "change pose": 0.5,
+    "change color": 0.5,
+    "change material": 0.5,
+    "change background": 0.5,
+    "change style": 0.5
+  },
+  "lowest_t_category": [
+    "random",
+    0.5
+  ],
+  "highest_t_category": [
+    "random",
+    0.5
+  ],
+  "global_best_config_parsed": {
+    "t_start": 0.5,
+    "t_end": 0.1,
+    "t_delta": 0.0,
+    "cleanup": true
+  },
+  "keyword_classifier_acc_%": 48.285714285714285,
+  "llm_classifier_acc_%": 13.142857142857142,
+  "probe_seconds_per_image": 0.6955731428571429,
+  "spearman_knee_vs_best_t_by_category": NaN
+}

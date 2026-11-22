@@ -1,0 +1,20 @@
+== A_same_edit_cleaner_bg
+Fixed: paper default                                           CLIPed 22.30 +0.00 [+0.00, +0.00] | PSNR 22.76 +0.00 [+0.00, +0.00] | LPIPS 0.116 | cfgs 1
+Fixed: dev best under constraint (ts0.90_te0.30_d0.15_c1)      CLIPed 22.30 +0.00 [+0.00, +0.00] | PSNR 22.76 +0.00 [+0.00, +0.00] | LPIPS 0.116 | cfgs 1
+Category table (true label)                                    CLIPed 22.14 -0.16 [-0.29, -0.03] | PSNR 23.29 +0.53 [+0.39, +0.70] | LPIPS 0.109 | cfgs 5
+Keyword classifier -> table                                    CLIPed 22.11 -0.20 [-0.34, -0.06] | PSNR 23.18 +0.43 [+0.30, +0.58] | LPIPS 0.111 | cfgs 5
+LLM classifier -> table                                        CLIPed 21.36 -0.94 [-1.17, -0.72] | PSNR 25.46 +2.70 [+2.46, +2.95] | LPIPS 0.083 | cfgs 5
+Velocity probe (tau=0.6, meets constraint on dev: True)        CLIPed 22.59 +0.28 [+0.10, +0.47] | PSNR 21.59 -1.17 [-1.39, -0.95] | LPIPS 0.129 | cfgs 7
+Oracle per image (in-sample)                                   CLIPed 23.03 +0.73 [+0.64, +0.83] | PSNR 24.23 +1.47 [+1.27, +1.68] | LPIPS 0.095 | cfgs 28
+table: {'random': 'ts0.90_te0.30_d0.15_c1', 'change object': 'ts0.90_te0.30_d0.15_c1', 'add object': 'ts0.90_te0.30_d0.15_c1', 'delete object': 'ts0.90_te0.30_d0.15_c1', 'change content': 'ts0.50_te0.20_d0.00_c1', 'change pose': 'ts0.50_te0.10_d0.00_c1', 'change color': 'ts0.90_te0.30_d0.15_c1', 'change material': 'ts0.90_te0.30_d0.15_c1', 'change background': 'ts0.70_te0.30_d0.00_c1', 'change style': 'ts0.60_te0.40_d0.00_c1'}
+== B_same_bg_stronger_edit
+Fixed: paper default                                           CLIPed 22.30 +0.00 [+0.00, +0.00] | PSNR 22.76 +0.00 [+0.00, +0.00] | LPIPS 0.116 | cfgs 1
+Fixed: dev best under constraint (ts0.70_te0.30_d0.00_c1)      CLIPed 22.11 -0.20 [-0.38, -0.02] | PSNR 23.02 +0.26 [+0.16, +0.36] | LPIPS 0.113 | cfgs 1
+Category table (true label)                                    CLIPed 22.20 -0.10 [-0.19, -0.02] | PSNR 23.23 +0.48 [+0.35, +0.61] | LPIPS 0.110 | cfgs 4
+Keyword classifier -> table                                    CLIPed 22.14 -0.16 [-0.26, -0.07] | PSNR 23.05 +0.29 [+0.21, +0.37] | LPIPS 0.111 | cfgs 4
+LLM classifier -> table                                        CLIPed 21.60 -0.70 [-0.92, -0.47] | PSNR 24.62 +1.86 [+1.67, +2.06] | LPIPS 0.090 | cfgs 4
+Oracle per image (in-sample)                                   CLIPed 23.46 +1.16 [+1.02, +1.30] | PSNR 24.03 +1.28 [+1.13, +1.43] | LPIPS 0.095 | cfgs 24
+table: {'random': 'ts0.90_te0.30_d0.15_c1', 'change object': 'ts0.90_te0.30_d0.15_c1', 'add object': 'ts0.75_te0.20_d0.00_c1', 'delete object': 'ts0.90_te0.30_d0.15_c1', 'change content': 'ts0.60_te0.20_d0.00_c1', 'change pose': 'ts0.70_te0.30_d0.00_c1', 'change color': 'ts0.90_te0.30_d0.15_c1', 'change material': 'ts0.60_te0.20_d0.00_c1', 'change background': 'ts0.90_te0.30_d0.15_c1', 'change style': 'ts0.90_te0.30_d0.15_c1'}
+knee: {'random': 0.727, 'change object': 0.681, 'add object': 0.744, 'delete object': 0.714, 'change content': 0.731, 'change pose': 0.755, 'change color': 0.782, 'change material': 0.731, 'change background': 0.744, 'change style': 0.727}
+dominating %: 43.3
+EXIT 0

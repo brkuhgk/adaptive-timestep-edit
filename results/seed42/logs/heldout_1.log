@@ -1,0 +1,16 @@
+nohup: ignoring input
+2026-11-22 15:01:54,272 | INFO | Held-out seed 43: 537 (image, config) pairs in this shard
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Using cache found in /root/.cache/torch/hub/facebookresearch_dino_main
+2026-11-22 15:02:03,490 | INFO | score 0/537
+2026-11-22 15:02:16,580 | INFO | score 50/537
+2026-11-22 15:02:29,680 | INFO | score 100/537
+2026-11-22 15:02:43,024 | INFO | score 150/537
+2026-11-22 15:02:56,086 | INFO | score 200/537
+2026-11-22 15:03:09,227 | INFO | score 250/537
+2026-11-22 15:03:22,603 | INFO | score 300/537
+2026-11-22 15:03:35,869 | INFO | score 350/537
+2026-11-22 15:03:49,245 | INFO | score 400/537
+2026-11-22 15:04:02,698 | INFO | score 450/537
+2026-11-22 15:04:15,287 | INFO | score 500/537
+2026-11-22 15:04:23,875 | INFO | Done: /workspace/adaptive-timestep-edit/work/results/metrics_heldout.shard1of2.csv

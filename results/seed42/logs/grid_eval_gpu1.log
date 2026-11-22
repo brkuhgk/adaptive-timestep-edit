@@ -1,0 +1,18 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-11-22 03:47:20,251 | INFO | [700/9800] ts0.50_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,287 | INFO | [1400/9800] ts0.50_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,322 | INFO | [2100/9800] ts0.60_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,358 | INFO | [2800/9800] ts0.60_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,394 | INFO | [3500/9800] ts0.70_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,430 | INFO | [4200/9800] ts0.70_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,467 | INFO | [4900/9800] ts0.75_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,503 | INFO | [5600/9800] ts0.75_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,540 | INFO | [6300/9800] ts0.80_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,576 | INFO | [7000/9800] ts0.80_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,612 | INFO | [7700/9800] ts0.90_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,648 | INFO | [8400/9800] ts0.90_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,685 | INFO | [9100/9800] ts1.00_te0.20_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+2026-11-22 03:47:20,721 | INFO | [9800/9800] ts1.00_te0.40_d0.00_c1 seed 42: 0 new edits, 0.000 s/edit
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Using cache found in /root/.cache/torch/hub/facebookresearch_dino_main
+2026-11-22 04:25:50,237 | INFO | Wrote 8120 new metric rows to /workspace/adaptive-timestep-edit/work/results/metrics_long.shard1of2.csv
