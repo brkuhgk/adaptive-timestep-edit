@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import numpy as np  # noqa: E402
 from PIL import Image  # noqa: E402
 
-from ate.cli import LOG, base_parser, grid_image_path, setup  # noqa: E402
+from ate.cli import LOG, base_parser, grid_image_path, parse_shard, setup, shard_suffix  # noqa: E402
 from ate.objective import EVAL_METRICS  # noqa: E402
 from ate.pie import CENTER_CROP_SUBDIR, mask_decode  # noqa: E402
 
@@ -48,12 +48,13 @@ def load_calculator(settings, fake: bool, device):
 def main() -> None:
     args = base_parser(__doc__).parse_args()
     settings, items = setup(args)
-    configs = settings.grid()
+    si, sn = parse_shard(args.shard)
+    configs = settings.grid()[si::sn]
     seeds = settings.seeds(args.quick)
     calc, compute = load_calculator(settings, args.fake, args.device)
     src_root = settings.path("pie_root") / CENTER_CROP_SUBDIR
 
-    out_path = settings.results / "metrics_long.csv"
+    out_path = settings.results / f"metrics_long{shard_suffix(args.shard)}.csv"
     done = set()
     if out_path.exists():
         with out_path.open() as f:

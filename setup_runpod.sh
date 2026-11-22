@@ -10,6 +10,7 @@ mkdir -p ext checkpoints datasets
 [ -d ext/PnPInversion ] || git clone https://github.com/Harvard-AI-and-Robotics-Lab/PnPInversion.git ext/PnPInversion
 
 # 2) Python deps. Keep the pod's preinstalled CUDA torch; install the rest.
+export PIP_BREAK_SYSTEM_PACKAGES=1
 python -m pip install --upgrade pip
 grep -v -E '^(torch|torchaudio|torchvision)' ext/ChordEdit-Reproduction/requirement.txt > /tmp/lab_requirements.txt
 python -m pip install -r /tmp/lab_requirements.txt
@@ -17,8 +18,13 @@ python -m pip install -r requirements.txt
 
 # 3) SD-Turbo weights (accept the license on Hugging Face first if prompted; then `huggingface-cli login`)
 if [ ! -d checkpoints/sd-turbo/unet ]; then
-  huggingface-cli download stabilityai/sd-turbo --local-dir checkpoints/sd-turbo \
-    --include "unet/*" "vae/*" "text_encoder/*" "tokenizer/*" "scheduler/*" "model_index.json"
+  python - <<'PY'
+from huggingface_hub import snapshot_download
+snapshot_download("stabilityai/sd-turbo", local_dir="checkpoints/sd-turbo",
+                  allow_patterns=["unet/*", "vae/*", "text_encoder/*", "tokenizer/*", "scheduler/*", "model_index.json"],
+                  ignore_patterns=["*.fp16.*", "*.bin"])
+print("sd-turbo downloaded")
+PY
 fi
 
 # 4) PIE-Bench must be requested via the form linked in ext/PnPInversion/README.md
@@ -28,4 +34,4 @@ if [ ! -f datasets/PIE-Bench_v1/mapping_file.json ]; then
 fi
 
 python -c "import torch; print('torch', torch.__version__, 'cuda', torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else '')"
-echo "Setup done. Next: bash run_all.sh --max-samples 70   (a ~10-minute check), then: bash run_all.sh --quick"
+echo "Setup done. Next: bash pod_bootstrap.sh "<PIE-Bench link>"  (does everything), or run_all.sh / run_parallel.sh by hand"

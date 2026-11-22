@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from PIL import Image  # noqa: E402
 
-from ate.cli import LOG, base_parser, grid_image_path, setup  # noqa: E402
+from ate.cli import LOG, base_parser, grid_image_path, parse_shard, setup, shard_suffix  # noqa: E402
 from ate.editor import edit_image, load_pipeline  # noqa: E402
 
 
@@ -22,13 +22,15 @@ def main() -> None:
     configs = settings.grid()
     if args.only_config:
         configs = [c for c in configs if c.id == args.only_config]
+    si, sn = parse_shard(args.shard)
+    configs = configs[si::sn]
     seeds = settings.seeds(args.quick)
     strip = bool(settings.raw["grid"].get("strip_brackets", False))
     base = settings.base_edit_config()
     pipe = load_pipeline(settings, fake=args.fake, device=args.device)
     pie_root = settings.path("pie_root")
 
-    timing_path = settings.results / "timing_grid.csv"
+    timing_path = settings.results / f"timing_grid{shard_suffix(args.shard)}.csv"
     new_file = not timing_path.exists()
     with timing_path.open("a", newline="") as tf:
         tw = csv.writer(tf)

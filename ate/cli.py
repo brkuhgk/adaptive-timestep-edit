@@ -19,7 +19,22 @@ def base_parser(description: str) -> argparse.ArgumentParser:
     p.add_argument("--quick", action="store_true", help="Only the first seed")
     p.add_argument("--max-samples", type=int, default=None, help="Only the first N PIE samples")
     p.add_argument("--device", default=None)
+    p.add_argument("--shard", default=None, help="I/N: this process handles shard I of N (one per GPU)")
     return p
+
+
+def parse_shard(value):
+    if not value:
+        return 0, 1
+    i, n = (int(x) for x in str(value).split("/"))
+    if not 0 <= i < n:
+        raise SystemExit(f"--shard {value}: need 0 <= I < N")
+    return i, n
+
+
+def shard_suffix(value) -> str:
+    i, n = parse_shard(value)
+    return "" if n == 1 else f".shard{i}of{n}"
 
 
 def setup(args) -> Tuple[Settings, List[PieItem]]:

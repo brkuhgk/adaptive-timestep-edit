@@ -30,9 +30,9 @@ def derived(summary: dict, results: Path) -> dict:
         "a training-free probe of where the two prompts' predictions diverge" if name.startswith("Velocity")
         else "a small LLM that reads the two prompts" if name.startswith("LLM")
         else "a keyword rule over the two prompts" if name.startswith("Prompt keywords") else name)
-    probe = results / "probe_long.csv"
-    if probe.exists():
-        v["probe_unet_calls"] = float(pd.read_csv(probe)["unet_calls"].iloc[0])
+    probes = sorted(results.glob("probe_long*.csv"))
+    if probes:
+        v["probe_unet_calls"] = float(pd.read_csv(probes[0])["unet_calls"].iloc[0])
     table = results / "main_table.md"
     v["MAIN_TABLE"] = table.read_text().strip() if table.exists() else "[run scripts/06_analyze.py]"
     return v

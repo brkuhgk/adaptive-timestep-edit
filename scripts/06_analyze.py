@@ -71,11 +71,17 @@ def main() -> None:
     res = settings.results
     split = split_or_die(settings)
     category = {it.sample_id: it.category for it in items}
-    metrics = coerce_numeric(pd.read_csv(res / "metrics_long.csv", dtype={"sample_id": str}))
+    metric_files = sorted(res.glob("metrics_long*.csv"))
+    if not metric_files:
+        raise SystemExit("No metrics_long*.csv found; run scripts/03_evaluate.py first.")
+    metrics = coerce_numeric(pd.concat([pd.read_csv(f, dtype={"sample_id": str}) for f in metric_files], ignore_index=True))
+    metrics = metrics.drop_duplicates(["sample_id", "config_id", "seed"])
     metrics = metrics[metrics["sample_id"].isin(category)]
     if args.quick:
         metrics = metrics[metrics["seed"] == settings.seeds()[0]]
-    probe_long = pd.read_csv(res / "probe_long.csv", dtype={"sample_id": str}) if (res / "probe_long.csv").exists() else None
+    probe_files = sorted(res.glob("probe_long*.csv"))
+    probe_long = (pd.concat([pd.read_csv(f, dtype={"sample_id": str}) for f in probe_files], ignore_index=True)
+                  .drop_duplicates(["sample_id", "t"]) if probe_files else None)
     clf = pd.read_csv(res / "classifier.csv", dtype={"sample_id": str}) if (res / "classifier.csv").exists() else None
     obj = settings.raw["objective"]
     boot = settings.raw["bootstrap"]

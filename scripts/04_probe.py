@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import torch  # noqa: E402
 from PIL import Image  # noqa: E402
 
-from ate.cli import LOG, base_parser, setup  # noqa: E402
+from ate.cli import LOG, base_parser, parse_shard, setup, shard_suffix  # noqa: E402
 from ate.editor import compute_prompt_deltas, load_pipeline  # noqa: E402
 from ate.probe_math import curve_statistics  # noqa: E402
 
@@ -20,6 +20,8 @@ from ate.probe_math import curve_statistics  # noqa: E402
 def main() -> None:
     args = base_parser(__doc__).parse_args()
     settings, items = setup(args)
+    si, sn = parse_shard(args.shard)
+    items = items[si::sn]
     pcfg = settings.raw["probe"]
     ts = [float(t) for t in pcfg["t_candidates"]]
     seed = settings.seeds()[0]
@@ -27,7 +29,7 @@ def main() -> None:
     pipe = load_pipeline(settings, fake=args.fake, device=args.device)
     pie_root = settings.path("pie_root")
 
-    out_path = settings.results / "probe_long.csv"
+    out_path = settings.results / f"probe_long{shard_suffix(args.shard)}.csv"
     done = set()
     if out_path.exists():
         with out_path.open() as f:
